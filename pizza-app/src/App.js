@@ -92,18 +92,47 @@ function App() {
     console.log("Distance in km:", distanceInKm);
   }
 
+  const handleEvent = (id) => {
+    console.log("Radi");
+    console.log(id);
+
+    Axios.get(
+      `https://private-anon-e33bded453-pizzaapp.apiary-mock.com/restaurants/${id}/menu?category=Pizza&orderBy=rank`
+    ).then((data) => {
+      console.log(data.data);
+      setMenu(data.data);
+    });
+  };
+
+  const [menu, setMenu] = useState([]);
+
   return (
     <div>
       {listOfRestaurants.length > 0 && (
         <ul>
           {listOfRestaurants.map((restaurants) => (
-            <li key={restaurants.id}>
+            <li
+              key={restaurants.id}
+              onClick={() => {
+                handleEvent(restaurants.id);
+              }}
+            >
               {restaurants.name} | {restaurants.address1},{" "}
               {restaurants.address2}
             </li>
           ))}
         </ul>
       )}
+      <hr></hr>
+      <div>
+        {menu.length > 0 && (
+          <ul>
+            {menu.map((el) => {
+              return <div key={el.id}>{el.name}</div>;
+            })}
+          </ul>
+        )}
+      </div>
       <button onClick={getLocation}>Get location</button>
       <h1>Coordinates</h1>
       <p>{status}</p>
