@@ -106,6 +106,14 @@ function App() {
 
   const [menu, setMenu] = useState([]);
 
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (name) => {
+    console.log(name);
+    setCart([...cart, name]);
+    console.log(cart);
+  };
+
   return (
     <div>
       {listOfRestaurants.length > 0 && (
@@ -124,11 +132,30 @@ function App() {
         </ul>
       )}
       <hr></hr>
+
+      <div>
+        <h3>Cart</h3>
+        {cart.length > 0 &&
+          cart.map((el, index) => {
+            return <div key={index}>{el}</div>;
+          })}
+      </div>
+
+      <hr></hr>
       <div>
         {menu.length > 0 && (
           <ul>
             {menu.map((el) => {
-              return <div key={el.id}>{el.name}</div>;
+              return (
+                <div
+                  key={el.id}
+                  onClick={() => {
+                    addToCart(el.name);
+                  }}
+                >
+                  {el.name}
+                </div>
+              );
             })}
           </ul>
         )}
