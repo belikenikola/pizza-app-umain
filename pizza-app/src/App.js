@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Axios from "axios";
 import * as geolib from "geolib";
 import { convertDistance, getDistance } from "geolib";
+import axios from "axios";
 
 function App() {
   const [lat, setLat] = useState(null);
@@ -95,6 +96,7 @@ function App() {
   const handleEvent = (id) => {
     console.log("Radi");
     console.log(id);
+    setRestaurantId(id);
 
     Axios.get(
       `https://private-anon-e33bded453-pizzaapp.apiary-mock.com/restaurants/${id}/menu?category=Pizza&orderBy=rank`
@@ -108,10 +110,51 @@ function App() {
 
   const [cart, setCart] = useState([]);
 
-  const addToCart = (name) => {
-    console.log(name);
-    setCart([...cart, name]);
+  const [restuarantId, setRestaurantId] = useState(null);
+
+  const [orderReceived, setOrderReceived] = useState(null);
+
+  const [orderInfo, setOrderInfo] = useState(null);
+
+  const addToCart = (id, name) => {
+    console.log(id);
+    setCart([
+      ...cart,
+      {
+        menuItemId: id,
+        quantity: 1,
+        name: name,
+      },
+    ]);
     console.log(cart);
+  };
+
+  const postOrder = () => {
+    axios
+      .post(
+        "https://private-anon-0195f60de5-pizzaapp.apiary-mock.com/orders/",
+        {
+          cart: [...cart],
+          restuarantId: restuarantId,
+        }
+      )
+      .then((res) => {
+        setOrderReceived(res.data.orderId);
+        const orderId = res.data.orderId;
+        axios
+          .get(
+            "https://private-anon-0195f60de5-pizzaapp.apiary-mock.com/orders/id"
+          )
+          .then((resGet) => {
+            console.log("res get metode ");
+            console.log(resGet);
+
+            setOrderInfo({
+              status: resGet.data.status,
+              totalPrice: resGet.data.totalPrice,
+            });
+          });
+      });
   };
 
   return (
@@ -137,9 +180,18 @@ function App() {
         <h3>Cart</h3>
         {cart.length > 0 &&
           cart.map((el, index) => {
-            return <div key={index}>{el}</div>;
+            return <div key={index}>{el.name}</div>;
           })}
+        <button onClick={() => postOrder()}>Order</button>
+        {orderInfo && (
+          <div>
+            <div>status : {orderInfo.status} </div>
+            <div>total price : {orderInfo.totalPrice} </div>
+          </div>
+        )}
       </div>
+      <hr></hr>
+      <div></div>
 
       <hr></hr>
       <div>
@@ -150,7 +202,7 @@ function App() {
                 <div
                   key={el.id}
                   onClick={() => {
-                    addToCart(el.name);
+                    addToCart(el.id, el.name);
                   }}
                 >
                   {el.name}
